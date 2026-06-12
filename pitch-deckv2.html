@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>City Road Research — Private &amp; Confidential</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+:root{
+  --paper:#F4F2EC;
+  --paper-2:#FBFAF6;
+  --card:#FCFBF8;
+  --ink:#16202E;
+  --ink-2:#27313F;
+  --text:#3C4450;
+  --muted:#717A86;
+  --faint:#9AA1AB;
+  --line:rgba(22,32,46,0.14);
+  --line-soft:rgba(22,32,46,0.07);
+  --accent:#2E5AAC;
+  --accent-deep:#1E3E7B;
+  --accent-soft:rgba(46,90,172,0.10);
+  --cream:#EDEAE0;
+  --cream-mute:#AFB6BF;
+  --gold:#B5893D;
+  --warn:#B14B3A;
+  --serif:'Fraunces',Georgia,serif;
+  --sans:'Inter',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{margin:0;font-family:var(--sans);color:var(--text);
+  background:radial-gradient(120% 120% at 50% 0%,#E7E4DB 0%,#DBD8CF 100%);
+  display:flex;align-items:center;justify-content:center;overflow:hidden;-webkit-font-smoothing:antialiased;}
+
+.stage{position:relative;
+  width:min(calc(100vw - 44px),calc((100vh - 104px) * 16 / 9));
+  height:min(calc((100vw - 44px) * 9 / 16),calc(100vh - 104px));
+  background:var(--paper);border-radius:6px;
+  box-shadow:0 26px 70px rgba(20,26,36,0.30),0 2px 8px rgba(20,26,36,0.18);
+  overflow:hidden;container:stage / size;}
+.slide{position:absolute;inset:0;padding:5.5cqh 5.5cqw;display:none;flex-direction:column;opacity:0;transition:opacity .35s ease;}
+.slide.active{display:flex;opacity:1;}
+
+.s-top{display:flex;align-items:center;justify-content:space-between;}
+.wordmark{display:flex;align-items:center;gap:1cqw;}
+.wm-mark{width:2.3cqw;height:2.3cqw;position:relative;flex:0 0 auto;}
+.wm-mark span{position:absolute;inset:0;border:0.18cqw solid var(--ink);transform:rotate(45deg);border-radius:0.3cqw;}
+.wm-mark span:nth-child(2){inset:30%;background:var(--accent);border:none;box-shadow:0 0 1.4cqw rgba(46,90,172,.4);}
+.wm-txt{font-family:var(--serif);font-weight:600;font-size:1.55cqw;letter-spacing:0.01em;color:var(--ink);}
+.wm-txt em{font-style:normal;color:var(--muted);font-weight:400;}
+.s-meta{font-family:var(--mono);font-size:0.85cqw;letter-spacing:0.16em;color:var(--faint);text-transform:uppercase;}
+
+.s-body{flex:1;display:flex;flex-direction:column;justify-content:center;padding:2.6cqh 0;min-height:0;}
+.s-foot{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--line);padding-top:1.6cqh;}
+.s-foot .sec,.s-foot .pg{font-family:var(--mono);font-size:0.78cqw;letter-spacing:0.14em;color:var(--faint);text-transform:uppercase;}
+
+.eyebrow{font-family:var(--mono);font-size:0.92cqw;letter-spacing:0.22em;text-transform:uppercase;color:var(--accent);margin-bottom:1.9cqh;display:flex;align-items:center;gap:0.9cqw;}
+.eyebrow .rn{color:var(--ink);}
+.eyebrow::after{content:"";flex:1;height:1px;background:var(--line);max-width:7cqw;}
+
+h1.title{font-family:var(--serif);font-weight:600;color:var(--ink);font-size:3.7cqw;line-height:1.06;letter-spacing:-0.015em;margin:0 0 1.8cqh;}
+h1.title em{font-style:italic;color:var(--accent);font-weight:500;}
+.lede{font-family:var(--sans);font-size:1.32cqw;line-height:1.5;color:var(--text);max-width:64cqw;margin:0 0 2.4cqh;}
+.lede strong{color:var(--ink);font-weight:600;}
+
+.grid{display:grid;gap:1.3cqw;}
+.g2{grid-template-columns:1fr 1fr;}
+.g3{grid-template-columns:repeat(3,1fr);}
+.g4{grid-template-columns:repeat(4,1fr);}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:5px;padding:1.5cqw;display:flex;flex-direction:column;gap:0.6cqh;}
+.card .ml{font-family:var(--mono);font-size:0.72cqw;letter-spacing:0.14em;text-transform:uppercase;color:var(--accent);}
+.card h3{font-family:var(--serif);font-weight:600;font-size:1.25cqw;color:var(--ink);margin:0;line-height:1.18;}
+.card p{font-size:0.92cqw;line-height:1.5;color:var(--muted);margin:0;}
+.card .num{font-family:var(--mono);font-size:0.78cqw;color:var(--faint);letter-spacing:0.1em;}
+
+.slide--dark{background:var(--ink);}
+.slide--dark .wm-txt{color:var(--cream);}
+.slide--dark .wm-txt em{color:var(--cream-mute);}
+.slide--dark .wm-mark span{border-color:var(--cream);}
+.slide--dark .s-meta{color:var(--cream-mute);}
+.slide--dark h1.title{color:var(--cream);}
+.slide--dark h1.title em{color:#9CB6E6;}
+.slide--dark .lede{color:var(--cream-mute);}
+.slide--dark .lede strong{color:var(--cream);}
+.slide--dark .s-foot{border-color:rgba(255,255,255,0.12);}
+.slide--dark .s-foot .sec,.slide--dark .s-foot .pg{color:var(--cream-mute);}
+
+table{width:100%;border-collapse:collapse;}
+thead th{font-family:var(--mono);font-size:0.74cqw;letter-spacing:0.13em;text-transform:uppercase;color:var(--muted);text-align:left;padding:1.1cqh 1cqw;border-bottom:1.5px solid var(--ink);}
+tbody td{padding:1.3cqh 1cqw;border-bottom:1px solid var(--line);font-size:0.96cqw;color:var(--text);line-height:1.45;vertical-align:top;}
+tbody tr:last-child td{border-bottom:none;}
+.t-layer{font-family:var(--serif);font-weight:600;font-size:1.08cqw;color:var(--ink);}
+.t-out{font-family:var(--mono);font-size:0.82cqw;color:var(--accent);letter-spacing:0.04em;}
+
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:2cqw;}
+.col{border:1px solid var(--line);border-radius:5px;padding:1.7cqw;}
+.col.legacy{background:var(--paper-2);}
+.col.now{background:var(--ink);border-color:var(--ink);}
+.col .tag{font-family:var(--mono);font-size:0.72cqw;letter-spacing:0.16em;text-transform:uppercase;padding:0.4cqh 0.8cqw;border-radius:20px;display:inline-block;margin-bottom:1.3cqh;}
+.col.legacy .tag{color:var(--muted);border:1px solid var(--line);}
+.col.now .tag{color:#9CB6E6;border:1px solid rgba(156,182,230,0.4);}
+.col h4{font-family:var(--serif);font-weight:600;font-size:1.25cqw;margin:0 0 1.1cqh;color:var(--ink);}
+.col.now h4{color:var(--cream);}
+.col ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:0.9cqh;}
+.col li{font-size:0.96cqw;color:var(--text);display:flex;gap:0.7cqw;align-items:baseline;}
+.col.now li{color:var(--cream-mute);}
+.col li::before{content:"—";color:var(--accent);}
+.col.now li::before{color:#9CB6E6;}
+
+.pipe{display:grid;grid-template-columns:repeat(8,1fr);gap:0.6cqw;}
+.pipe .step{background:var(--card);border:1px solid var(--line);border-radius:5px;padding:1.1cqw 0.8cqw;display:flex;flex-direction:column;gap:0.7cqh;}
+.pipe .step i{font-size:1.25cqw;color:var(--accent);}
+.pipe .step .n{font-family:var(--mono);font-size:0.7cqw;color:var(--faint);letter-spacing:0.1em;}
+.pipe .step h5{font-family:var(--serif);font-weight:600;font-size:0.88cqw;color:var(--ink);margin:0;line-height:1.18;}
+
+.metric-card{background:var(--card);border:1px solid var(--line);border-radius:5px;padding:1.6cqw;}
+.metric-num{font-family:var(--serif);font-weight:600;font-size:2.7cqw;color:var(--ink);line-height:1;letter-spacing:-0.01em;}
+.metric-num .u{font-family:var(--sans);font-size:0.9cqw;color:var(--muted);font-weight:500;}
+.metric-lbl{font-family:var(--mono);font-size:0.72cqw;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted);margin-bottom:0.7cqh;}
+.metric-cap{font-size:0.84cqw;color:var(--muted);line-height:1.45;margin-top:0.8cqh;}
+
+.founder{display:flex;gap:1.3cqw;align-items:flex-start;background:var(--card);border:1px solid var(--line);border-radius:5px;padding:1.7cqw;}
+.av{width:4.4cqw;height:4.4cqw;border-radius:50%;background:var(--paper-2);border:1px dashed var(--line);flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:0.7cqw;color:var(--faint);}
+.founder h3{font-family:var(--serif);font-weight:600;font-size:1.4cqw;color:var(--ink);margin:0;}
+.founder .role{font-family:var(--mono);font-size:0.74cqw;letter-spacing:0.12em;text-transform:uppercase;color:var(--accent);margin:0.4cqh 0 0.8cqh;}
+.founder p{font-size:0.92cqw;line-height:1.5;color:var(--muted);margin:0;}
+
+.fly-wrap{display:flex;align-items:center;gap:2.4cqw;}
+.fly-svg{flex:0 0 auto;width:42cqw;}
+.fly-side h3{font-family:var(--serif);font-weight:600;font-size:1.5cqw;color:var(--ink);margin:0 0 1.2cqh;}
+.fly-side p{font-size:1cqw;line-height:1.55;color:var(--muted);margin:0;}
+
+.kv-row{display:flex;justify-content:space-between;align-items:baseline;gap:1cqw;padding:1cqh 0;border-bottom:1px solid var(--line-soft);}
+.kv-row:last-child{border-bottom:none;}
+.kv-row .k{font-size:0.95cqw;color:var(--text);}
+.kv-row .v{font-family:var(--mono);font-size:0.86cqw;color:var(--accent);letter-spacing:0.02em;text-align:right;}
+
+.terms-row{display:grid;grid-template-columns:0.3fr 1fr;gap:1.8cqw;padding:1.8cqh 0;border-bottom:1px solid var(--line);align-items:baseline;}
+.terms-row:last-of-type{border-bottom:none;}
+.terms-row .tk{font-family:var(--serif);font-weight:600;font-size:1.3cqw;color:var(--ink);}
+.terms-row .td{font-size:1cqw;line-height:1.5;color:var(--text);}
+
+.lk{display:flex;align-items:center;gap:1.2cqw;padding:1.3cqw;border:1px solid var(--line);border-radius:5px;background:var(--card);text-decoration:none;transition:border-color .2s,transform .2s;}
+.lk:hover{border-color:var(--accent);transform:translateX(0.3cqw);}
+.lk .ic{width:3cqw;height:3cqw;border-radius:5px;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.15cqw;flex:0 0 auto;}
+.lk h4{font-family:var(--serif);font-weight:600;font-size:1.08cqw;color:var(--ink);margin:0 0 0.3cqh;}
+.lk p{font-size:0.84cqw;color:var(--muted);margin:0;}
+
+.chartbox{position:relative;width:100%;}
+
+.source-note{font-family:var(--mono);font-size:0.72cqw;color:var(--faint);margin-top:1.2cqh;line-height:1.5;letter-spacing:0.02em;}
+.source-note strong{color:var(--muted);font-weight:500;}
+
+.caption{font-family:var(--mono);font-size:0.7cqw;letter-spacing:0.05em;color:var(--faint);margin-top:1cqh;line-height:1.5;}
+
+.callout{background:var(--ink);color:var(--cream);border-radius:5px;padding:1.4cqw 1.6cqw;display:flex;gap:1cqw;align-items:flex-start;}
+.callout .icq{font-family:var(--serif);font-size:2cqw;color:#9CB6E6;line-height:0.8;flex:0 0 auto;}
+.callout p{margin:0;font-size:1cqw;line-height:1.5;color:var(--cream);font-family:var(--serif);font-style:italic;}
+
+.stage-card{background:var(--card);border:1px solid var(--line);border-radius:5px;padding:1.4cqw;display:flex;flex-direction:column;gap:0.8cqh;position:relative;}
+.stage-card .stg{font-family:var(--mono);font-size:0.72cqw;letter-spacing:0.16em;text-transform:uppercase;color:var(--accent);}
+.stage-card h4{font-family:var(--serif);font-weight:600;font-size:1.05cqw;margin:0;color:var(--ink);line-height:1.2;}
+.stage-card .ta{font-size:0.88cqw;color:var(--text);line-height:1.45;}
+.stage-card .mt{font-family:var(--mono);font-size:0.72cqw;color:var(--muted);letter-spacing:0.04em;border-top:1px dashed var(--line);padding-top:0.7cqh;margin-top:0.4cqh;line-height:1.45;}
+
+.nav{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:14px;background:var(--ink);color:var(--cream);padding:8px 10px;border-radius:40px;box-shadow:0 8px 24px rgba(20,26,36,0.35);z-index:50;}
+.nav button{background:none;border:none;color:var(--cream);cursor:pointer;font-size:15px;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .2s;}
+.nav button:hover{background:rgba(255,255,255,0.12);}
+.nav .count{font-family:var(--mono);font-size:12px;letter-spacing:0.1em;color:var(--cream-mute);min-width:54px;text-align:center;}
+
+.index{position:fixed;inset:0;background:rgba(15,20,28,0.95);z-index:60;display:none;padding:5vh 6vw;overflow:auto;}
+.index.open{display:block;}
+.index h2{font-family:var(--mono);font-size:13px;letter-spacing:0.2em;text-transform:uppercase;color:var(--cream-mute);margin:0 0 24px;}
+.index-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;}
+.index-item{text-align:left;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:5px;padding:12px 14px;cursor:pointer;color:var(--cream);display:flex;gap:12px;align-items:baseline;transition:background .2s,border-color .2s;}
+.index-item:hover{background:rgba(46,90,172,0.22);border-color:var(--accent);}
+.index-item .ii-n{font-family:var(--mono);font-size:11px;color:#9CB6E6;}
+.index-item .ii-t{font-family:var(--serif);font-size:15px;}
+.index-close{position:fixed;top:20px;right:24px;background:none;border:none;color:var(--cream);font-size:22px;cursor:pointer;}
+
+.hint{position:fixed;bottom:20px;right:22px;font-family:var(--mono);font-size:10px;letter-spacing:0.12em;color:rgba(20,26,36,0.45);z-index:40;}
+
+@media (max-width:720px){.hint{display:none;}.nav{bottom:10px;}}
+@media (prefers-reduced-motion:reduce){.slide{transition:none;}}
+</style>
+</head>
+<body>
+
+<div class="stage" id="stage">
+
+<!-- 1 · COVER -->
+<section class="slide slide--dark active" data-title="Cover">
+  <div class="s-top">
+    <div class="wordmark"><div class="wm-mark"><span></span><span></span></div><div class="wm-txt">City Road <em>Research</em></div></div>
+    <div class="s-meta">Private &amp; Confidential</div>
+  </div>
+  <div class="s-body">
+    <h1 class="title" style="font-size:4.2cqw;max-width:80cqw;">Systematic trading infrastructure for 24/7 event and <em>tokenised</em> markets.</h1>
+    <p class="lede" style="font-size:1.5cqw;max-width:62cqw;">Market making provides the cashflow and execution-data base. Proprietary strategies <strong>compound the edge</strong> on the same infrastructure.</p>
+  </div>
+  <div class="s-foot"><span class="sec">City Road Research Ltd. · Private Placement</span><span class="pg">01</span></div>
+</section>
+
+<!-- 2 · MARKET SHIFT -->
+<section class="slide" data-title="The Market Shift">
+  <div class="s-top"><div class="wordmark"><div class="wm-mark"><span></span><span></span></div><div class="wm-txt">City Road <em>Research</em></div></div><div class="s-meta">Private &amp; Confidential</div></div>
+  <div class="s-body">
+    <div class="eyebrow"><span class="rn">I</span> — The Market</div>
+    <h1 class="title">Trading is moving to markets that <em>never close</em>.</h1>
+    <p class="lede">Volume is migrating into fragmented, always-on venues — Hyperliquid, Polymarket, Kalshi, sports and event markets, and tokenised real-world assets — before institutional pricing efficiency has caught up.</p>
+    <div class="cols">
+      <div class="col legacy">
+        <span class="tag">Legacy venues</span>
+        <h4>Closed, centralised, mature</h4>
+        <ul><li>Fixed trading hours</li><li>Concentrated, well-capitalised market makers</li><li>Pricing fully institutionalised</li></ul>
+      </div>
+      <div class="col now">
+        <span class="tag">Next-generation venues</span>
+        <h4>Hyperliquid · Polymarket · Kalshi · sports / event markets · tokenised RWAs</h4>
+        <ul><li>24/7, fragmented liquidity</li><li>Immature market-making infrastructure</li><li>Liquid enough to trade — not yet efficient enough to be institutional</li></ul>
+      </div>
+    </div>
+  </div>
+  <div class="s-foot"><span class="sec">I — The Market</span><span class="pg">02</span></div>
+</section>
+
+<!-- 3 · MARKET CONTEXT -->
+<section class="slide" data-title="Market Context">
+  <div class="s-top"><div class="wordmark"><div class="wm-mark"><span></span><span></span></div><div class="wm-txt">City Road <em>Research</em></div></div><div class="s-meta">Private &amp; Confidential</div></div>
+  <div class="s-body">
+    <div class="eyebrow"><span class="rn">II</span> — Market Context</div>
+    <h1 class="title">High-growth <em>frontiers</em>.</h1>
+    <p class="lede">Source-backed external market indicators across our target venue families.</p>
+    <div class="grid g3">
+      <div class="metric-card">
+        <div class="metric-lbl">Prediction markets</div>
+        <div class="metric-num">$24B <span class="u">/ month</span></div>
+        <p class="metric-cap">Large and growing event-market execution pools across consumer-facing and exchange-style venues.</p>
+      </div>
+      <div class="metric-card">
+        <div class="metric-lbl">Tokenised RWAs</div>
+        <div class="metric-num">$31.5B</div>
+        <p class="metric-cap">On-chain asset issuance and tokenised exposure are expanding the universe of tradable reference markets.</p>
+      </div>
+      <div class="metric-card">
+        <div class="metric-lbl">Hyperliquid volume</div>
+        <div class="metric-num">$181B <span class="u">/ month</span></div>
+        <p class="metric-cap">High-throughput on-chain derivatives volume creates a venue-native opportunity for market making and tokenised asset execution.</p>
+      </div>
+    </div>
+    <p class="source-note"><strong>Sources:</strong> public venue dashboards, on-chain market data, <code style="font-family:inherit;">rwa.xyz</code>, <code style="font-family:inherit;">DefiLlama</code>, Dune-style dashboards, regulatory / venue disclosures and City Road Research analysis. Figures to be refreshed before investor distribution.</p>
+  </div>
+  <div class="s-foot"><span class="sec">II — Market Context</span><span class="pg">03</span></div>
+</section>
+
+<!-- 4 · MARKET SIZING -->
+<section class="slide" data-title="Market Sizing">
+  <div class="s-top"><div class="wordmark"><div class="wm-mark"><span></span><span></span></div><div class="wm-txt">City Road <em>Research</em></div></div><div class="s-meta">Private &amp; Confidential</div></div>
+  <div class="s-body">
+    <div class="eyebrow"><span class="rn">III</span> — Market Sizing</div>
+    <h1 class="title">Cross-asset <em>allocation</em> framework.</h1>
+    <p class="lede">A modelled addressable-market framework: top-down market context, narrowed to where City Road can realistically deploy infrastructure, then sized to modelled execution capacity.</p>
+    <div class="grid g3">
+      <div class="metric-card">
+        <div class="metric-lbl">Total addressable (TAM)</div>
+        <div class="metric-num">$65.80B <span class="u">/ day</span></div>
+        <p class="metric-cap">Total relevant daily volume across on-chain derivatives, event markets, sports / event contracts and tokenised asset exposures.</p>
+      </div>
+      <div class="metric-card" style="border-color:rgba(46,90,172,0.4);background:rgba(46,90,172,0.04);">
+        <div class="metric-lbl" style="color:var(--accent);">Serviceable available (SAM)</div>
+        <div class="metric-num" style="color:var(--accent);">$3.20B <span class="u">/ day</span></div>
+        <p class="metric-cap">Markets where City Road can realistically deploy infrastructure: Hyperliquid tokenised derivatives, selected prediction markets, sports / event contracts and reference-priced event markets.</p>
+      </div>
+      <div class="metric-card" style="border-color:rgba(181,137,61,0.4);background:rgba(181,137,61,0.05);">
+        <div class="metric-lbl" style="color:var(--gold);">Serviceable obtainable (SOM)</div>
+        <div class="metric-num" style="color:var(--gold);">$160M <span class="u">/ day</span></div>
+        <p class="metric-cap">Modelled execution capacity based on capital, turnover, venue depth, liquidity constraints and risk limits — illustrative 5% capture of modelled SAM capacity, not a market-share forecast.</p>
+      </div>
+    </div>
+    <p class="source-note"><strong>Sources:</strong> public venue dashboards, on-chain market data, <code style="font-family:inherit;">rwa.xyz</code>, <code style="font-family:inherit;">DefiLlama</code>, Dune-style dashboards, Kalshi / Polymarket public data and regulatory disclosures, plus City Road Research analysis.</p>
+  </div>
+  <div class="s-foot"><span class="sec">III — Market Sizing</span><span class="pg">04</span></div>
+</section>
+
+<!-- 5 · INEFFICIENCY -->
+<section class="slide" data-title="The Inefficiency">
+  <div class="s-top"><div class="wordmark"><div class="wm-mark"><span></span><span></span></div><div class="wm-txt">City Road <em>Research</em></div></div><div class="s-meta">Private &amp; Confidential</div></div>
+  <div class="s-body">
+    <div class="eyebrow"><span class="rn">IV</span> — Why It's Still Inefficient</div>
+    <h1 class="title">Liquid, but <em>not yet efficient</em>.</h1>
+    <p class="lede">Six structural features keep pricing loose enough to trade against — and create room for disciplined, infrastructure-led execution.</p>
+    <div class="grid g3">
+      <div class="card"><span class="num">01</span><h3>Fragmented liquidity</h3><p>Depth is split across venues with no consolidated book.</p></div>
+      <div class="card"><span class="num">02</span><h3>Consumer-led participation</h3><p>Many venues are retail-facing; sharp flow is concentrated in narrow channels.</p></div>
+      <div class="card"><span class="num">03</span><h3>Wide spreads in long-tail markets</h3><p>Beyond the most liquid contracts, spreads remain economically attractive.</p></div>
+      <div class="card"><span class="num">04</span><h3>Price-lag between venues</h3><p>The same outcome reprices at different speeds across books.</p></div>
+      <div class="card"><span class="num">05</span><h3>Incomplete MM coverage</h3><p>Few professional market makers operate continuously across these venues.</p></div>
+      <div class="card"><span class="num">06</span><h3>Domain-specific mispricing</h3><p>Sports, event and tokenised assets lack mature reference pricing.</p></div>
+    </div>
+  </div>
+  <div class="s-foot"><span class="sec">IV — The Inefficiency</span><span class="pg">05</span></div>
+</section>
+
+<!-- 6 · WHY NOW -->
+<section class="slide" data-title="Why Now">
+  <div class="s-top"><div class="wordmark"><div class="wm-mark"><span></span><span></span></div><div class="wm-txt">City Road <em>Research</em></div></div><div class="s-meta">Private &amp; Confidential</div></div>
+  <div class="s-body">
+    <div class="eyebrow"><span class="rn">V</span> — Why Now</div>
+    <h1 class="title">A <em>three-driver</em> window.</h1>
+    <p class="lede">Three forces are converging — and the efficiency gap is widest precisely while volumes are scaling fastest.</p>
+    <div class="grid g3">
+      <div class="card"><span class="ml">01 · Venue growth</span><h3>Volumes are scaling</h3><p>Crypto-native and regulated event venues are growing faster than legacy adjacencies.</p></div>
+      <div class="card"><span class="ml">02 · Institutionalisation</span><h3>Venues are professionalising</h3><p>Custody, settlement and oversight are improving across both regulated and on-chain venues.</p></div>
+      <div class="card"><span class="ml">03 · Efficiency gap</span><h3>Pricing infrastructure lags</h3><p>Professional pricing, market making and risk systems have not yet caught up with venue growth.</p></div>
+    </div>
+    <p class="caption" style="margin-top:1.6cqh;">Regulatory treatment of event and on-chain markets remains evolving and is treated as a core risk-management workstream.</p>
+  </div>
+  <div class="s-foot"><span class="sec">V — Why Now</span><span class="pg">06</span></div>
+</section>
+
+<!-- 7 · CONSUMER FLOW -->
+<section class="slide" data-title="Consumer Flow">
+  <div class="s-top"><div class="wordmark"><div class="wm-mark"><span></span><span></span></div><div class="wm-txt">City Road <em>Research</em></div></div><div class="s-meta">Private &amp; Confidential</div></div>
+  <div class="s-body">
+    <div class="eyebrow"><span class="rn">VI</span> — Flow Composition</div>
+    <h1 class="title">Consumer flow creates the <em>initial inefficiency</em>.</h1>
+    <p class="lede">Many prediction and sports / event venues are consumer-facing. Direct retail-flow share is not consistently disclosed — so City Road treats it as a measurable research question, not an assumption.</p>
+    <div class="grid g4">
+      <div class="card"><span class="ml">Proxy 01</span><h3 style="font-size:1cqw;">Trade-size distribution</h3><p>Notional histograms separate small consumer tickets from institutional clips.</p></div>
+      <div class="card"><span class="ml">Proxy 02</span><h3 style="font-size:1cqw;">Wallet clustering</h3><p>On-chain venues allow address-level clustering and behavioural classification.</p></div>
+      <div class="card"><span class="ml">Proxy 03</span><h3 style="font-size:1cqw;">Order-book behaviour</h3><p>Cancel ratios, depth replenishment and quote dynamics reveal who is providing liquidity.</p></div>
+      <div class="card"><span class="ml">Proxy 04</span><h3 style="font-size:1cqw;">Price impact</h3><p>Markouts and impact decay separate informed from uninformed flow.</p></div>
+    </div>
+    <p class="caption" style="margin-top:1.6cqh;">Sharp-vs-public price divergence is tracked across venues as an additional measure of informed-flow concentration.</p>
+  </div>
+  <div class="s-foot"><span class="sec">VI — Flow Composition</span><span class="pg">07</span></div>
+</section>
+
+<!-- 8 · PLATFORM -->
+<section class="slide" data-title="The Platform">
+  <div class="s-top"><div class="wordmark"><div class="wm-mark"><span></span><span></span></div><div class="wm-txt">City Road <em>Research</em></div></div><div class="s-meta">Private &amp; Confidential</div></div>
+  <div class="s-body">
+    <div class="eyebrow"><span class="rn">VII</span> — The Platform</div>
+    <h1 class="title">One stack powers <em>every strategy</em>.</h1>
+    <p class="lede">A single execution and data platform supports market making, price discovery, sports / event alpha, research, risk management and capital allocation.</p>
+    <div class="pipe">
+      <div class="step"><span class="n">01</span><i class="fa-solid fa-database"></i><h5>Data ingestion</h5></div>
+      <div class="step"><span class="n">02</span><i class="fa-solid fa-layer-group"></i><h5>Book / odds capture</h5></div>
+      <div class="step"><span class="n">03</span><i class="fa-solid fa-plug"></i><h5>Venue adapters</h5></div>
+      <div class="step"><span class="n">04</span><i class="fa-solid fa-bolt"></i><h5>Execution gateways</h5></div>
+      <div class="step"><span class="n">05</span><i class="fa-solid fa-shield-halved"></i><h5>Risk controls</h5></div>
+      <div class="step"><span class="n">06</span><i class="fa-solid fa-rotate-left"></i><h5>Replay / backtesting</h5></div>
+      <div class="step"><span class="n">07</span><i class="fa-solid fa-diagram-project"></i><h5>Strategy deployment</h5></div>
+      <div class="step"><span class="n">08</span><i class="fa-solid fa-scale-balanced"></i><h5>Capital allocation</h5></div>
+    </div>
+  </div>
+  <div class="s-foot"><span class="sec">VII — The Platform</span><span class="pg">08</span></div>
+</section>
+
+<!-- 9 · EXECUTION ENVIRONMENTS -->
+<section class="slide" data-title="Execution Environments">
+  <div class="s-top"><div class="wordmark"><div class="wm-mark"><span></span><span></span></div><div class="wm-txt">City Road <em>Research</em></div></div><div class="s-meta">Private &amp; Confidential</div></div>
+  <div class="s-body">
+    <div class="eyebrow"><span class="rn">VIII</span> — Execution Environments</div>
+    <h1 class="title">Where we <em>deploy capital</em>.</h1>
+    <p class="lede">Each venue plays a distinct strategic role — not a target asset list.</p>
+    <table>
+      <thead><tr><th style="width:18%;">Environment</th><th style="width:42%;">Strategic role</th><th>Initial focus</th></tr></thead>
+      <tbody>
+        <tr><td class="t-layer">Hyperliquid</td><td>Primary market-making volume engine and tokenised RWA execution base.</td><td>Gold, WTI, Brent, Silver and other high-liquidity perps where spread / depth economics are attractive.</td></tr>
+        <tr><td class="t-layer">Polymarket</td><td>Event-market execution layer and cross-venue price-discovery venue.</td><td>Sports, politics and macro / event contracts where external reference prices exist.</td></tr>
+        <tr><td class="t-layer">Kalshi</td><td>Regulated event-market venue and US execution channel.</td><td>Sports / event contracts; price comparison and fair-value validation.</td></tr>
+        <tr><td class="t-layer">Sports markets / sharp books</td><td>Reference-pricing layer and proprietary research testbed.</td><td>NFL, MLB, NBA, football / soccer and other repeatable event-flow markets.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="s-foot"><span class="sec">VIII — Execution Environments</span><span class="pg">09</span></div>
+</section>
+
+<!-- 10 · STRATEGY ARCHITECTURE -->
+<section class="slide" data-title="Strategy Architecture">
+  <div class="s-top"><div class="wordmark"><div class="wm-mark"><span></span><span></span></div><div class="wm-txt">City Road <em>Research</em></div></div><div class="s-meta">Private &amp; Confidential</div></div>
+  <div class="s-body">
+    <div class="eyebrow"><span class="rn">IX</span> — Strategy Architecture</div>
+    <h1 class="title">Three layers, <em>one stack</em>.</h1>
+    <p class="lede">Each layer feeds the next; the risk engine gates all of them.</p>
+    <table>
+      <thead><tr><th style="width:22%;">Layer</th><th>Role</th><th style="width:26%;">Output</th></tr></thead>
+      <tbody>
+        <tr><td class="t-layer">Execution Infrastructure</td><td>Captures books, fills, odds, settlement, latency and flow.</td><td class="t-out">Proprietary data lake</td></tr>
+        <tr><td class="t-layer">Market Making</td><td>Earns spread / rebates where risk-adjusted economics are attractive.</td><td class="t-out">Cashflow + execution data</td></tr>
+        <tr><td class="t-layer">Proprietary Alpha</td><td>Trades mispricings from cross-venue signals and event research.</td><td class="t-out">Higher-margin PnL</td></tr>
+        <tr><td class="t-layer">Risk Engine</td><td>Gates every strategy through exposure, liquidity and drawdown controls.</td><td class="t-out">Capital preservation</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="s-foot"><span class="sec">IX — Strategy Architecture</span><span class="pg">10</span></div>
+</section>
+
+<!-- 11 · HOW WE MAKE MONEY -->
+<section class="slide" data-title="How We Make Money">
+  <div class="s-top"><div class="wordmark"><div class="wm-mark"><span></span><span></span></div><div class="wm-txt">City Road <em>Research</em></div></div><div class="s-meta">Private &amp; Confidential</div></div>
+  <div class="s-body">
+    <div class="eyebrow"><span class="rn">X</span> — How We Make Money</div>
+    <h1 class="title">Multiple strategies, <em>one infrastructure</em> base.</h1>
+    <table>
+      <thead><tr><th style="width:17%;">Strategy</th><th>What we do</th><th>Revenue logic</th><th style="width:20%;">Constraint</th></tr></thead>
+      <tbody>
+        <tr><td class="t-layer">Market making</td><td>Quote selected markets where spread exceeds adverse-selection risk.</td><td>Earn net spread, rebates and volume incentives after fees and slippage.</td><td class="t-out">Inventory, adverse selection, venue depth, volatility</td></tr>
+        <tr><td class="t-layer">Price discovery</td><td>Compare prediction markets, sharp books, exchanges and reference prices.</td><td>Trade temporary dislocations before convergence.</td><td class="t-out">Liquidity, latency, capital lock-up, edge decay</td></tr>
+        <tr><td class="t-layer">Sports / event alpha</td><td>Use proprietary models and research to identify mispriced outcomes.</td><td>Capture edge on event contracts.</td><td class="t-out">Model accuracy, market depth, limits, event risk</td></tr>
+        <tr><td class="t-layer">Tokenised RWA dislocations</td><td>Compare Hyperliquid / tokenised perps against reference markets.</td><td>Trade basis, lag, funding and liquidity gaps.</td><td class="t-out">Reference quality, funding, volatility, execution cost</td></tr>
+        <tr><td class="t-layer">Research-driven signals</td><td>Use computer vision, player-level data and flow classification.</td><td>Feed higher-conviction trading decisions.</td><td class="t-out">Data quality, validation, signal decay</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="s-foot"><span class="sec">X — How We Make Money</span><span class="pg">11</span></div>
+</section>
+
+<!-- 12 · MARKET MAKING ENGINE -->
+<section class="slide" data-title="Market Making Engine">
+  <div class="s-top"><div class="wordmark"><div class="wm-mark"><span></span><span></span></div><div class="wm-txt">City Road <em>Research</em></div></div><div class="s-meta">Private &amp; Confidential</div></div>
+  <div class="s-body">
+    <div class="eyebrow"><span class="rn">XI</span> — Tier 1 · Market Making</div>
+    <h1 class="title">The <em>base layer</em>.</h1>
+    <p class="lede">Risk-gated liquidity provision in selected venues where spreads, rebates, depth and adverse selection support attractive economics — not liquidity everywhere. The base layer generates proprietary execution data from real orders, fills, queue position and market response.</p>
+    <div class="grid g3">
+      <div class="card"><span class="ml">Capture</span><h3>Spread capture</h3><p>Quote two-sided where economics are favourable.</p></div>
+      <div class="card"><span class="ml">Optimise</span><h3>Fee &amp; rebate optimisation</h3><p>Tier into maker rebates and volume discounts.</p></div>
+      <div class="card"><span class="ml">Control</span><h3>Inventory control</h3><p>Hold positions within hard per-venue limits.</p></div>
+      <div class="card"><span class="ml">Monitor</span><h3>Adverse-selection monitoring</h3><p>Detect and widen against informed flow.</p></div>
+      <div class="card"><span class="ml">Protect</span><h3>Liquidity pull in volatility</h3><p>Withdraw quoting automatically under stress.</p></div>
+      <div class="card"><span class="ml">Compound</span><h3>Data from real fills</h3><p>Every fill enriches the proprietary data lake.</p></div>
+    </div>
+  </div>
+  <div class="s-foot"><span class="sec">XI — Tier 1</span><span class="pg">12</span></div>
+</section>
+
+<!-- 13 · PROPRIETARY ALPHA -->
+<section class="slide" data-title="Proprietary Alpha">
+  <div class="s-top"><div class="wordmark"><div class="wm-mark"><span></span><span></span></div><div class="wm-txt">City Road <em>Research</em></div></div><div class="s-meta">Private &amp; Confidential</div></div>
+  <div class="s-body">
+    <div class="eyebrow"><span class="rn">XII</span> — Tier 2 · Proprietary Alpha</div>
+    <h1 class="title">From liquidity provision to <em>proprietary edge</em>.</h1>
+    <p class="lede">Market making teaches the system where liquidity is real, where adverse selection appears, and which venues update slowly. That execution data feeds proprietary models that identify mispricings across prediction markets, sharp books, exchange prices and tokenised assets.</p>
+    <div class="grid g3">
+      <div class="card"><h3>Cross-venue price-lag</h3><p>Sharp-book inefficiency before prices converge.</p></div>
+      <div class="card"><h3>Sports model alpha</h3><p>Proprietary event-outcome modelling.</p></div>
+      <div class="card"><h3>Computer-vision research</h3><p>Player-level signal extraction.</p></div>
+      <div class="card"><h3>Wallet / flow classification</h3><p>Separating consumer from sharp flow on-chain.</p></div>
+      <div class="card"><h3>Event-driven mispricing</h3><p>Repricing around scheduled events.</p></div>
+      <div class="card"><h3>Tokenised RWA dislocations</h3><p>Perpetuals vs reference prices.</p></div>
+    </div>
+    <p class="caption" style="margin-top:1.4cqh;">Price-lag arbitrage is expected to decay as markets mature. City Road is building durable research and execution capability — not underwriting a single temporary edge.</p>
+  </div>
+  <div class="s-foot"><span class="sec">XII — Tier 2</span><span class="pg">13</span></div>
+</section>
+
+<!-- 14 · DATA FLYWHEEL -->
+<section class="slide" data-title="Data Flywheel">
+  <div class="s-top"><div class="wordmark"><div class="wm-mark"><span></span><span></span></div><div class="wm-txt">City Road <em>Research</em></div></div><div class="s-meta">Private &amp; Confidential</div></div>
+  <div class="s-body">
+    <div class="eyebrow"><span class="rn">XIII</span> — The Flywheel</div>
+    <h1 class="title">Every trade <em>sharpens</em> the system.</h1>
+    <div class="fly-wrap">
+      <div class="fly-svg">
+        <svg viewBox="0 0 620 460" width="100%" xmlns="http://www.w3.org/2000/svg" font-family="IBM Plex Mono, monospace">
+          <circle cx="310" cy="230" r="172" fill="none" stroke="rgba(22,32,46,0.12)" stroke-width="1.5"/>
+          <g stroke="rgba(22,32,46,0.08)" stroke-width="1">
+            <line x1="310" y1="230" x2="310" y2="58"/><line x1="310" y1="230" x2="459" y2="144"/>
+            <line x1="310" y1="230" x2="459" y2="316"/><line x1="310" y1="230" x2="310" y2="402"/>
+            <line x1="310" y1="230" x2="161" y2="316"/><line x1="310" y1="230" x2="161" y2="144"/>
+          </g>
+          <circle cx="310" cy="230" r="52" fill="#16202E"/>
+          <text x="310" y="222" text-anchor="middle" fill="#9CB6E6" font-size="20">&#8635;</text>
+          <text x="310" y="244" text-anchor="middle" fill="#EDEAE0" font-size="9.5" letter-spacing="1.5">ONE</text>
+          <text x="310" y="256" text-anchor="middle" fill="#EDEAE0" font-size="9.5" letter-spacing="1.5">STACK</text>
+          <g transform="translate(310,58)"><circle r="22" fill="#FCFBF8" stroke="#2E5AAC" stroke-width="1.5"/><text text-anchor="middle" y="4" fill="#2E5AAC" font-size="12" font-weight="600">01</text><text text-anchor="middle" y="-32" fill="#16202E" font-size="11">Observe more</text><text text-anchor="middle" y="-20" fill="#16202E" font-size="11">markets</text></g>
+          <g transform="translate(459,144)"><circle r="22" fill="#FCFBF8" stroke="#2E5AAC" stroke-width="1.5"/><text text-anchor="middle" y="4" fill="#2E5AAC" font-size="12" font-weight="600">02</text><text text-anchor="middle" y="-32" fill="#16202E" font-size="11">Better</text><text text-anchor="middle" y="-20" fill="#16202E" font-size="11">execution data</text></g>
+          <g transform="translate(459,316)"><circle r="22" fill="#FCFBF8" stroke="#2E5AAC" stroke-width="1.5"/><text text-anchor="middle" y="4" fill="#2E5AAC" font-size="12" font-weight="600">03</text><text text-anchor="middle" y="42" fill="#16202E" font-size="11">Sharper</text><text text-anchor="middle" y="54" fill="#16202E" font-size="11">adverse-sel. model</text></g>
+          <g transform="translate(310,402)"><circle r="22" fill="#FCFBF8" stroke="#2E5AAC" stroke-width="1.5"/><text text-anchor="middle" y="4" fill="#2E5AAC" font-size="12" font-weight="600">04</text><text text-anchor="middle" y="42" fill="#16202E" font-size="11">Better quoting</text><text text-anchor="middle" y="54" fill="#16202E" font-size="11">&amp; allocation</text></g>
+          <g transform="translate(161,316)"><circle r="22" fill="#FCFBF8" stroke="#2E5AAC" stroke-width="1.5"/><text text-anchor="middle" y="4" fill="#2E5AAC" font-size="12" font-weight="600">05</text><text text-anchor="middle" y="42" fill="#16202E" font-size="11">More profitable</text><text text-anchor="middle" y="54" fill="#16202E" font-size="11">trades</text></g>
+          <g transform="translate(161,144)"><circle r="22" fill="#FCFBF8" stroke="#2E5AAC" stroke-width="1.5"/><text text-anchor="middle" y="4" fill="#2E5AAC" font-size="12" font-weight="600">06</text><text text-anchor="middle" y="-32" fill="#16202E" font-size="11">Larger</text><text text-anchor="middle" y="-20" fill="#16202E" font-size="11">dataset</text></g>
+        </svg>
+      </div>
+      <div class="fly-side">
+        <h3>The same infrastructure compounds across all strategies.</h3>
+        <p>More observed markets produce better execution data. Better data sharpens the adverse-selection model, which improves quoting and capital allocation. That drives more profitable trades — and a larger proprietary dataset that feeds back into every strategy on the stack.</p>
+      </div>
+    </div>
+  </div>
+  <div class="s-foot"><span class="sec">XIII — The Flywheel</span><span class="pg">14</span></div>
+</section>
+
+<!-- 15 · MARKET → MODEL BRIDGE -->
+<section class="slide" data-title="Market → Model Bridge">
+  <div class="s-top"><div class="wordmark"><div class="wm-mark"><span></span><span></span></div><div class="wm-txt">City Road <em>Research</em></div></div><div class="s-meta">Private &amp; Confidential</div></div>
+  <div class="s-body">
+    <div class="eyebrow"><span class="rn">XIV</span> — Market → Model</div>
+    <h1 class="title">Large market, <em>small required capture</em>.</h1>
+    <p class="lede">The market is large, but the model is not dependent on unrealistic market share. It depends on disciplined execution inside a small slice of fragmented volume.</p>
+    <div class="cols">
+      <div class="col legacy">
+        <span class="tag">External market</span>
+        <h4>Large, fragmented, growing</h4>
+        <ul>
+          <li>Relevant venue volumes are large and growing</li>
+          <li>Consumer-led event trading and sports / event contracts expanding</li>
+          <li>Tokenised and on-chain markets create new reference-price dislocations</li>
+        </ul>
+      </div>
+      <div class="col now">
+        <span class="tag">City Road model</span>
+        <h4>Modest, capped, disciplined</h4>
+        <ul>
+          <li>Does not require capturing large market share</li>
+          <li>Underwrites modest venue capture</li>
+          <li>Tier 2 capped by capital and opportunity count</li>
+          <li>Market making is the base layer</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="s-foot"><span class="sec">XIV — Market → Model</span><span class="pg">15</span></div>
+</section>
+
+<!-- 16 · FINANCIAL MODEL -->
+<section class="slide" data-title="The Model">
+  <div class="s-top"><div class="wordmark"><div class="wm-mark"><span></span><span></span></div><div class="wm-txt">City Road <em>Research</em></div></div><div class="s-meta">Private &amp; Confidential</div></div>
+  <div class="s-body">
+    <div class="eyebrow"><span class="rn">XV</span> — The Financial Model</div>
+    <h1 class="title">Modelled on <em>net capture</em>, not gross volume.</h1>
+    <p class="lede" style="max-width:62cqw;">The model separates market-making volume, realised net edge, Tier 2 opportunity volume, capital constraints and operating costs. Market-making economics are driven by monthly volume × net capture after fees, rebates, slippage and adverse selection. Tier 2 strategies are capped by trading capital, opportunity count and executable liquidity.</p>
+    <div class="grid g4" style="gap:1cqw; margin-bottom:1.4cqh;">
+      <div class="metric-card" style="padding:1.2cqw;">
+        <div class="metric-lbl">Month 36 MM volume</div>
+        <div class="metric-num" style="font-size:1.9cqw;">$938M <span class="u">/ mo</span></div>
+        <p class="metric-cap" style="font-size:0.78cqw;">≈$11.3B annualised. Modelled.</p>
+      </div>
+      <div class="metric-card" style="padding:1.2cqw;">
+        <div class="metric-lbl">Month 36 net margin</div>
+        <div class="metric-num" style="font-size:1.9cqw;color:var(--accent);">26.7%</div>
+        <p class="metric-cap" style="font-size:0.78cqw;">FY3 gross margin 50.4% (modelled).</p>
+      </div>
+      <div class="metric-card" style="padding:1.2cqw;">
+        <div class="metric-lbl">Tier 2 recognised vol</div>
+        <div class="metric-num" style="font-size:1.9cqw;">$33.8M <span class="u">/ mo</span></div>
+        <p class="metric-cap" style="font-size:0.78cqw;">M36, capital- and opportunity-capped.</p>
+      </div>
+      <div class="metric-card" style="padding:1.2cqw;">
+        <div class="metric-lbl">Cumulative cash · M36</div>
+        <div class="metric-num" style="font-size:1.9cqw;color:var(--gold);">$5.74M</div>
+        <p class="metric-cap" style="font-size:0.78cqw;">Off $1.0M investment. Modelled.</p>
+      </div>
+    </div>
+    <div class="card" style="padding:1cqw;">
+      <div class="chartbox" style="height:20cqh;"><canvas id="modelChart"></canvas></div>
+    </div>
+    <p class="caption" style="margin-top:1cqh;">All figures modelled / illustrative — not a forecast or guarantee. Downside case haircuts revenue, delays Tier 2, increases adverse selection and holds opex constant.</p>
+  </div>
+  <div class="s-foot"><span class="sec">XV — The Model</span><span class="pg">16</span></div>
+</section>
+
+<!-- 17 · VALIDATION ROADMAP -->
+<section class="slide" data-title="Validation Roadmap">
+  <div class="s-top"><div class="wordmark"><div class="wm-mark"><span></span><span></span></div><div class="wm-txt">City Road <em>Research</em></div></div><div class="s-meta">Private &amp; Confidential</div></div>
+  <div class="s-body">
+    <div class="eyebrow"><span class="rn">XVI</span> — Validation Roadmap</div>
+    <h1 class="title">Capital scales <em>only after</em> validation.</h1>
+    <p class="lede">Four stages, each with a measurable success metric. We do not increase risk until the prior stage clears.</p>
+    <div class="grid g4">
+      <div class="stage-card">
+        <span class="stg">Stage 01</span>
+        <h4>Infrastructure &amp; data capture</h4>
+        <p class="ta">Stand up venue adapters, data lake, replay and risk controls.</p>
+        <div class="mt">Success — clean market data, order / fill logs, latency data, reconciliation.</div>
+      </div>
+      <div class="stage-card">
+        <span class="stg">Stage 02</span>
+        <h4>Market-making pilot</h4>
+        <p class="ta">Run limited-size, risk-gated quoting.</p>
+        <div class="mt">Success — stable liveness, controlled adverse selection, fill quality, no operational errors.</div>
+      </div>
+      <div class="stage-card">
+        <span class="stg">Stage 03</span>
+        <h4>Tier 2 signal validation</h4>
+        <p class="ta">Backtest, paper-test and live-test price-lag, sports and event signals.</p>
+        <div class="mt">Success — positive markouts after fees / slippage and executable liquidity.</div>
+      </div>
+      <div class="stage-card">
+        <span class="stg">Stage 04</span>
+        <h4>Capital scaling</h4>
+        <p class="ta">Increase capital only after risk and execution metrics are proven.</p>
+        <div class="mt">Success — profitable capital recycling within defined drawdown limits.</div>
+      </div>
+    </div>
+  </div>
+  <div class="s-foot"><span class="sec">XVI — Validation Roadmap</span><span class="pg">17</span></div>
+</section>
+
+<!-- 18 · TEAM -->
+<section class="slide" data-title="Team">
+  <div class="s-top"><div class="wordmark"><div class="wm-mark"><span></span><span></span></div><div class="wm-txt">City Road <em>Research</em></div></div><div class="s-meta">Private &amp; Confidential</div></div>
+  <div class="s-body">
+    <div class="eyebrow"><span class="rn">XVII</span> — Team</div>
+    <h1 class="title">Quant research meets <em>capital formation</em>.</h1>
+    <p class="lede">The team combines quantitative research, sports / event modelling, infrastructure execution, capital formation and commercial strategy.</p>
+    <div class="grid g2" style="gap:1.6cqw;">
+      <div class="founder">
+        <div class="av">PHOTO</div>
+        <div><h3>John Goodacre</h3><p class="role">Quantitative Research</p><p>Quant research, statistical modelling, sports data and market microstructure. Former Morgan Stanley and GSA Capital. PhD, UCL.</p></div>
+      </div>
+      <div class="founder">
+        <div class="av">PHOTO</div>
+        <div><h3>Kyle McFadden</h3><p class="role">Strategy, Operations &amp; Capital Formation</p><p>Strategy, capital formation, operations, real assets / tokenisation and go-to-market. Private equity and operating background, with experience building transformation, technology and investment workflows.</p></div>
+      </div>
+    </div>
+  </div>
+  <div class="s-foot"><span class="sec">XVII — Team</span><span class="pg">18</span></div>
+</section>
+
+<!-- 19 · RISK -->
+<section class="slide" data-title="Risk Management">
+  <div class="s-top"><div class="wordmark"><div class="wm-mark"><span></span><span></span></div><div class="wm-txt">City Road <em>Research</em></div></div><div class="s-meta">Private &amp; Confidential</div></div>
+  <div class="s-body">
+    <div class="eyebrow"><span class="rn">XVIII</span> — Risk</div>
+    <h1 class="title">Capital preservation is a <em>system layer</em>.</h1>
+    <p class="lede">Every strategy is risk-gated before and during execution. Controls are enforced pre-trade, in-flight and at end-of-day.</p>
+    <div class="grid g4" style="gap:0.9cqw;">
+      <div class="card"><span class="ml">Position</span><p style="color:var(--text);font-size:0.88cqw;">Position limits per market and in aggregate.</p></div>
+      <div class="card"><span class="ml">Inventory</span><p style="color:var(--text);font-size:0.88cqw;">Inventory limits with automatic rebalancing.</p></div>
+      <div class="card"><span class="ml">Kill</span><p style="color:var(--text);font-size:0.88cqw;">Exchange- and system-side kill switches.</p></div>
+      <div class="card"><span class="ml">Liquidity pull</span><p style="color:var(--text);font-size:0.88cqw;">Withdraw quoting on volatility / latency triggers.</p></div>
+      <div class="card"><span class="ml">Drawdown</span><p style="color:var(--text);font-size:0.88cqw;">Daily and cumulative max-drawdown limits.</p></div>
+      <div class="card"><span class="ml">Capital cap</span><p style="color:var(--text);font-size:0.88cqw;">Strategy-level capital caps.</p></div>
+      <div class="card"><span class="ml">Venue</span><p style="color:var(--text);font-size:0.88cqw;">Venue-level exposure caps.</p></div>
+      <div class="card"><span class="ml">Settlement</span><p style="color:var(--text);font-size:0.88cqw;">Settlement, counterparty &amp; smart-contract checks.</p></div>
+      <div class="card"><span class="ml">Segregation</span><p style="color:var(--text);font-size:0.88cqw;">Operating capital separated from trading capital.</p></div>
+      <div class="card"><span class="ml">Reconciliation</span><p style="color:var(--text);font-size:0.88cqw;">Independent reconciliation across books and venues.</p></div>
+    </div>
+  </div>
+  <div class="s-foot"><span class="sec">XVIII — Risk</span><span class="pg">19</span></div>
+</section>
+
+<!-- 20 · INVESTOR ECONOMICS -->
+<section class="slide" data-title="Investor Economics">
+  <div class="s-top"><div class="wordmark"><div class="wm-mark"><span></span><span></span></div><div class="wm-txt">City Road <em>Research</em></div></div><div class="s-meta">Private &amp; Confidential</div></div>
+  <div class="s-body">
+    <div class="eyebrow"><span class="rn">XIX</span> — Terms</div>
+    <h1 class="title"><em>Aligned</em>, simple terms.</h1>
+    <div>
+      <div class="terms-row"><div class="tk">Preferred return</div><div class="td">9% per annum, compounding yearly, until invested capital is returned.</div></div>
+      <div class="terms-row"><div class="tk">Catch-up</div><div class="td">Once capital and accrued preferred return are paid, a catch-up restores the agreed founder / HoldCo economic split.</div></div>
+      <div class="terms-row"><div class="tk">Dividends</div><div class="td">Pro-rata from net trading profits, distributed annually with board approval once the hurdle is met.</div></div>
+    </div>
+    <p class="caption" style="margin-top:1.8cqh;">Terms are indicative and subject to final legal documentation. Issued by City Road Research Ltd.</p>
+  </div>
+  <div class="s-foot"><span class="sec">XIX — Terms</span><span class="pg">20</span></div>
+</section>
+
+<!-- 21 · USE OF FUNDS -->
+<section class="slide" data-title="Use of Funds">
+  <div class="s-top"><div class="wordmark"><div class="wm-mark"><span></span><span></span></div><div class="wm-txt">City Road <em>Research</em></div></div><div class="s-meta">Private &amp; Confidential</div></div>
+  <div class="s-body">
+    <div class="eyebrow"><span class="rn">XX</span> — Use of Funds</div>
+    <h1 class="title">$1.0M first close — <em>staged deployment</em>.</h1>
+    <p class="lede">Expected to fund initial buildout and operating runway, subject to final hiring and infrastructure cadence. Staged into core team, infrastructure, research and trading reserve.</p>
+    <div class="grid g2" style="gap:2cqw;align-items:center;">
+      <div>
+        <div class="kv-row"><span class="k"><strong style="color:var(--ink);">Payroll · core team</strong></span><span class="v" style="color:var(--ink);">$775k · 77.5%</span></div>
+        <div class="kv-row"><span class="k"><strong style="color:var(--ink);">Trading capital reserve</strong></span><span class="v" style="color:var(--ink);">$150k · 15.0%</span></div>
+        <div class="kv-row"><span class="k"><strong style="color:var(--ink);">Admin · legal · compliance</strong></span><span class="v" style="color:var(--ink);">$45k · 4.5%</span></div>
+        <div class="kv-row"><span class="k"><strong style="color:var(--ink);">AI &amp; cloud infrastructure</strong></span><span class="v" style="color:var(--ink);">$30k · 3.0%</span></div>
+        <p class="caption" style="margin-top:1.2cqh;">Infrastructure reflects external cash cost; internal build labour is captured in core-team compensation. Allocation indicative.</p>
+      </div>
+      <div class="card" style="align-items:center;justify-content:center;padding:1.3cqw;">
+        <div class="chartbox" style="height:24cqh;display:flex;align-items:center;justify-content:center;">
+          <canvas id="fundsChart"></canvas>
+          <div style="position:absolute;text-align:center;pointer-events:none;">
+            <div style="font-family:var(--serif);font-weight:600;font-size:2cqw;color:var(--ink);">$1.0M</div>
+            <div style="font-family:var(--mono);font-size:0.72cqw;letter-spacing:0.14em;color:var(--muted);text-transform:uppercase;">First close</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="s-foot"><span class="sec">XX — Use of Funds</span><span class="pg">21</span></div>
+</section>
+
+<!-- 22 · DATA ROOM -->
+<section class="slide" data-title="Data Room">
+  <div class="s-top"><div class="wordmark"><div class="wm-mark"><span></span><span></span></div><div class="wm-txt">City Road <em>Research</em></div></div><div class="s-meta">Private &amp; Confidential</div></div>
+  <div class="s-body">
+    <div class="eyebrow"><span class="rn">XXI</span> — Data Room</div>
+    <h1 class="title">Diligence <em>materials</em>.</h1>
+    <div class="grid g2" style="gap:1.2cqw;">
+      <a class="lk" href="https://binary-alpha.github.io/risk-dashboard/" target="_blank" rel="noopener"><div class="ic"><i class="fa-solid fa-gauge-high"></i></div><div><h4>Risk Management Dashboard</h4><p>Pre-trade gating and execution parameters.</p></div></a>
+      <a class="lk" href="https://docs.google.com/spreadsheets/d/1VUI07DhqbwaTMQniDLYm_jYh8H058VHP_gIooop8rlc/edit?usp=sharing" target="_blank" rel="noopener"><div class="ic"><i class="fa-solid fa-chart-line"></i></div><div><h4>Financial Model</h4><p>Monthly cashflows, edge bridge and return waterfall.</p></div></a>
+      <a class="lk" href="https://binary-alpha.github.io/Technology-Map/" target="_blank" rel="noopener"><div class="ic"><i class="fa-solid fa-network-wired"></i></div><div><h4>Technology Architecture Map</h4><p>Data ingestion, execution and risk infrastructure.</p></div></a>
+      <a class="lk" href="https://drive.google.com/drive/folders/1Xk9nM-ScmiP16kVVkeMtPkvxOp_wF0vv?usp=sharing" target="_blank" rel="noopener"><div class="ic"><i class="fa-solid fa-folder-open"></i></div><div><h4>Investor Data Room</h4><p>Governance, terms and operational documents.</p></div></a>
+    </div>
+    <p class="caption" style="margin-top:1.8cqh;">This document is for information only and does not constitute an offer to subscribe for or purchase securities. Early-stage investment involves a high degree of risk. © City Road Research Ltd.</p>
+  </div>
+  <div class="s-foot"><span class="sec">XXI — Data Room</span><span class="pg">22</span></div>
+</section>
+
+</div>
+
+<div class="nav">
+  <button id="prev" aria-label="Previous"><i class="fa-solid fa-chevron-left"></i></button>
+  <span class="count" id="count">01 / 22</span>
+  <button id="next" aria-label="Next"><i class="fa-solid fa-chevron-right"></i></button>
+  <button class="menu-btn" id="menuBtn" aria-label="Index"><i class="fa-solid fa-table-cells-large"></i></button>
+</div>
+
+<div class="index" id="index">
+  <button class="index-close" id="indexClose"><i class="fa-solid fa-xmark"></i></button>
+  <h2>City Road Research — Contents</h2>
+  <div class="index-grid" id="indexGrid"></div>
+</div>
+
+<div class="hint">&#8592; &#8594; navigate</div>
+
+<script>
+const slides = Array.from(document.querySelectorAll('.slide'));
+let cur = 0;
+const count = document.getElementById('count');
+const charts = {};
+function pad(n){ return String(n+1).padStart(2,'0'); }
+
+function show(i){
+  i = Math.max(0, Math.min(slides.length-1, i));
+  slides[cur].classList.remove('active');
+  slides[i].classList.add('active');
+  cur = i;
+  count.textContent = pad(i) + ' / ' + slides.length;
+  if(slides[i].dataset.title === 'The Model') initModel();
+  if(slides[i].dataset.title === 'Use of Funds') initFunds();
+}
+document.getElementById('prev').onclick = function(){ show(cur-1); };
+document.getElementById('next').onclick = function(){ show(cur+1); };
+document.addEventListener('keydown', function(e){
+  if(e.key==='ArrowRight'||e.key===' '){ e.preventDefault(); show(cur+1); }
+  if(e.key==='ArrowLeft'){ show(cur-1); }
+  if(e.key==='Escape'){ document.getElementById('index').classList.remove('open'); }
+});
+
+const grid = document.getElementById('indexGrid');
+slides.forEach(function(s,i){
+  const b = document.createElement('button');
+  b.className='index-item';
+  b.innerHTML = '<span class="ii-n">'+pad(i)+'</span><span class="ii-t">'+s.dataset.title+'</span>';
+  b.onclick = function(){ show(i); document.getElementById('index').classList.remove('open'); };
+  grid.appendChild(b);
+});
+document.getElementById('menuBtn').onclick = function(){ document.getElementById('index').classList.add('open'); };
+document.getElementById('indexClose').onclick = function(){ document.getElementById('index').classList.remove('open'); };
+
+function initModel(){
+  if(charts.model) return;
+  const el = document.getElementById('modelChart'); if(!el) return;
+  Chart.defaults.font.family = 'Inter';
+  Chart.defaults.color = '#717A86';
+  // Quarterly aggregate from Full PnL: Total Revenue and NOI
+  // 36 months => 12 quarters but we'll show key year-ends
+  charts.model = new Chart(el.getContext('2d'), {
+    type:'bar',
+    data:{
+      labels:['M3 (Q1)','M6','M9','M12','M15','M18','M21','M24','M27','M30','M33','M36'],
+      datasets:[
+        {label:'Total revenue ($k, modelled)', data:[345,608,1041,1255,1303,1879,2136,2987,4019,4055,4019,4019],
+         backgroundColor:'rgba(46,90,172,0.85)', borderRadius:3, barPercentage:0.6, yAxisID:'y'},
+        {label:'NOI ($k, modelled)', data:[-114,-126,-49,52,32,-37,86,504,1333,1017,1082,1069],
+         backgroundColor:'rgba(181,137,61,0.85)', borderRadius:3, barPercentage:0.6, yAxisID:'y'}
+      ]
+    },
+    options:{ responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{position:'bottom', labels:{boxWidth:10, font:{size:10}}}},
+      scales:{ y:{ grid:{color:'rgba(22,32,46,0.08)'}, ticks:{callback:function(v){return '$'+v+'k';}}},
+               x:{ grid:{display:false}, ticks:{font:{size:9}}} } }
+  });
+}
+
+function initFunds(){
+  if(charts.funds) return;
+  const el = document.getElementById('fundsChart'); if(!el) return;
+  charts.funds = new Chart(el.getContext('2d'), {
+    type:'doughnut',
+    data:{ labels:['Core team','Trading reserve','Admin','Infrastructure'],
+      datasets:[{ data:[77.5,15,4.5,3], backgroundColor:['#1E3E7B','#2E5AAC','#B5893D','#93A8C9'], borderWidth:0, hoverOffset:8 }]},
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'72%', plugins:{legend:{display:false}}}
+  });
+}
+
+show(0);
+</script>
+</body>
+</html>
